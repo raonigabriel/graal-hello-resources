@@ -8,12 +8,9 @@ RUN mvn dependency:go-offline
 # After that, we copy the actual project file and build it using offline mode.
 COPY . .
 RUN mvn -o clean package && \
-    native-image --static -H:IncludeResources=message.txt -jar target/hello-resources.jar && \
-    strip hello-resources && \
-    ldd hello-resources && \
-    pwd && ls -la
+    strip ./target/hello-resources
 
 # We generate a two-layer image, with just our binary. No Alpine, no bash, nothing else!
 FROM scratch
-COPY --from=builder /graal-hello-resources/hello-resources /hello-resources
+COPY --from=builder /graal-hello-resources/target/hello-resources /hello-resources
 CMD ["./hello-resources"]
