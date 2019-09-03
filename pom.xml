@@ -5,7 +5,7 @@
 
 	<groupId>com.github.raonigabriel</groupId>
 	<artifactId>graal-hello-resources</artifactId>
-	<version>1.0.2</version>
+	<version>1.1.0</version>
 	<packaging>jar</packaging>
 
 	<name>graal-hello-resources</name>
@@ -23,13 +23,26 @@
 		<url>https://github.com/raonigabriel/graal-hello-resources</url>
 	</scm>
 
+	<developers>
+		<developer>
+			<id>raonigabriel</id>
+			<name>Raoni Gabriel</name>
+			<timezone>-3</timezone>
+			<url>https://github.com/raonigabriel</url>
+			<roles>
+				<role>Java Software Architect</role>
+				<role>Cloud Solutions Architect</role>
+				<role>DevOps Engineer</role>
+			</roles>
+		</developer>
+	</developers>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<graal-version>19.0.0</graal-version>
 	</properties>
 
 	<dependencies>
@@ -38,12 +51,6 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.6</version>
-		</dependency>
-		<dependency>
-			<groupId>com.oracle.substratevm</groupId>
-			<artifactId>svm</artifactId>
-			<version>${graal-version}</version>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
@@ -60,7 +67,7 @@
 				<!-- We pack everything as a single executable JAR -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.2.1</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -79,23 +86,42 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- We pack everything as a single native executable (static)  -->
-			<!-- We also force initialization at build time, to assign 'IS_NATIVE' to true -->
+
 			<plugin>
-				<groupId>com.oracle.substratevm</groupId>
-				<artifactId>native-image-maven-plugin</artifactId>
-				<version>${graal-version}</version>
+				<groupId>com.github.wvengen</groupId>
+				<artifactId>proguard-maven-plugin</artifactId>
+				<version>2.0.14</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
 						<goals>
-					<goal>native-image</goal>
+							<goal>proguard</goal>
 						</goals>
-						<configuration>
-							<buildArgs>--static --initialize-at-build-time -H:Name=${project.build.finalName} -H:IncludeResources=message.txt -H:NumberOfThreads=8</buildArgs>
-						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<obfuscate>true</obfuscate>
+					<outFilter>!META-INF/NOTICE.txt,!META-INF/LICENSE.txt</outFilter>
+					<includeDependency>false</includeDependency>
+					<injar>${project.build.finalName}-fat.jar</injar>
+					<outjar>${project.build.finalName}.jar</outjar>
+					<outputDirectory>${project.build.directory}</outputDirectory>
+					<options>
+						<option>-allowaccessmodification</option>
+						<option>-mergeinterfacesaggressively</option>
+						<option>-overloadaggressively</option>
+						<option>-repackageclasses</option>
+						<option>-optimizationpasses 5</option>
+						<option>-keep public class
+							com.github.raonigabriel.graal.HelloResources { public static void
+							main(java.lang.String[]); }</option>
+							<option>-printmapping target/proguard.map</option>
+					</options>
+					<libs>
+						<lib>${java.home}/lib/rt.jar</lib>
+						<lib>${java.home}/lib/jsse.jar</lib>
+					</libs>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
