@@ -17,14 +17,14 @@ $ docker build . -t hello-resources
 $ docker images
 ...
 REPOSITORY          TAG         IMAGE ID        CREATED         SIZE
-hello-resources     latest      e2cfee7b8ade    28 seconds ago  5.31MB
+hello-resources     latest      e2cfee7b8ade    28 seconds ago  16.9MB
 ...
 $ docker run --rm hello-resources
 Hello Native World!
 $
 ```
 ---
-# Wow... It is a 5.31 MB Docker image! No JVM, no deps, no Alpine. Just the native executable.
+# Wow... It is a 17MB Docker image! No JVM, just Alpine and our native executable.
 ---
 
 It uses Docker multi-stage builds (with Maven offline layered caching), which in turn will use the [graalvm-playground](https://hub.docker.com/r/raonigabriel/graalvm-playground/) 
@@ -55,13 +55,6 @@ root@be7deb9a56de:~# strip ./target/hello-resources
 root@be7deb9a56de:~# ls -la ./target
 root@be7deb9a56de:~# ldd ./target/hello-resources
         not a dynamic executable
-```
-
-## Notice that official 'native-image-maven-plugin', is bound to 'package' phase and calls native-image to generate "native binary"
-```
-<groupId>com.oracle.substratevm</groupId>
-<artifactId>native-image-maven-plugin</artifactId>
-<version>19.0.0</version>
 ```
 
 ## Source
