@@ -8,9 +8,11 @@ RUN mvn dependency:go-offline
 # After that, we copy the actual project file and build it using offline mode.
 COPY . .
 RUN mvn -o clean package && \
-    strip ./target/hello-resources
+    native-image --initialize-at-build-time  -jar ./target/hello-resources.jar && \
+    strip ./hello-resources
 
-# We generate a two-layer image, with just our binary. No Alpine, no bash, nothing else!
-FROM scratch
-COPY --from=builder /graal-hello-resources/target/hello-resources /hello-resources
-CMD ["./hello-resources"]
+# We generate a four-layer image, with the binary generated on the "builder" stage
+FROM frolvlad/alpine-glibc
+COPY --from=builder /graal-hello-resources/hello-resources /bin/hello-resources
+ENTRYPOINT ["/bin/hello-resources"]
+CMD ["hello-resources"]
