@@ -1,3 +1,9 @@
 .git
 .gitignore
 README.md
+target/
+.settings/
+.classfile
+.classpath
+.project
+.dockerignore
